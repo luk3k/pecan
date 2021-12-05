@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "antlr4": "^4.9.3",
+    "antlr4ts": "^0.5.0-alpha.4",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.11",
+    "antlr4ts-cli": "^0.5.0-alpha.4"
+  },
+  "scripts": {
+    "run-ast": "npx ts-node ./src/Ast.ts",
+    "antlr4ts-lexer": "antlr4ts -visitor parsers/JavaLexer.g4",
+    "antlr4ts-parser": "antlr4ts -visitor parsers/JavaParser.g4"
+  }
+}
