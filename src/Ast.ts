@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import {MethodDeclaration} from "./MethodDeclaration";
 import {ParseTree, ParseTreeWalker} from "antlr4ts/tree";
 import {CharStreams, CommonTokenStream} from "antlr4ts";
@@ -24,20 +23,19 @@ export class JavaAst implements Ast {
 
     /**
      * Initialize the ParseTree object for a given file
-     * @param path the path of the file we want to parse
+     * @param source the source code to be parsed
      */
-    constructor(path: string) {
-        this.tree = this.parse(path);
+    constructor(source: string) {
+        this.tree = this.parse(source);
         this.init();
     }
 
     /**
      * Parse the file from the given path and return
-     * @param path path of the file we want to parse
+     * @param source the source code to be parsed
      * @return ParseTree of the current file
      */
-    parse(path: string): ParseTree {
-        const source = fs.readFileSync(path).toString();
+    parse(source: string): ParseTree {
         const chars = CharStreams.fromString(source);
         const lexer = new JavaLexer(chars);
         const tokens = new CommonTokenStream(lexer);

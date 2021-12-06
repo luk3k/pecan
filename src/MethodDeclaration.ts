@@ -1,16 +1,15 @@
-import {RuleNode} from "antlr4ts/tree";
 import {Target} from "./Target";
 import {Variable} from "./Variable";
-import * as vscode from 'vscode';
+import {Range, Position} from 'vscode';
 
 export class MethodDeclaration extends Target {
     className: string;
     returnType: string;
     params: Variable[];
 
-    constructor(identifier: string, start: vscode.Position, end: vscode.Position, node: RuleNode,
+    constructor(identifier: Range, start: Position, end: Position,
                 className: string, returnType: string, params: Variable[]) {
-        super(identifier, start, end, node);
+        super(identifier, start, end);
         this.className = className;
         this.returnType = returnType;
         this.params = params;

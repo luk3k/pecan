@@ -1,18 +1,19 @@
 class Test {
+    Printer printer = new Printer();
+
     public static void main(String[] args) {
         printHello();
         Printer p = new Printer();
         p.print("What's up?");
         p.printMultiple("text1", "text2");
         p.printMultiple("print", "again");
-        Printer2 p2 = new Printer();
     }
 
     private static void printHello() {
         System.out.println("Hello");
     }
 
-    class Printer {
+    static class Printer {
         public Printer() {}
 
         public void print(String text) {

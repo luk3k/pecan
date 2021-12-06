@@ -5,7 +5,8 @@ import {JavaAst} from "./Ast";
 import {MethodDeclaration} from "./MethodDeclaration";
 import {MethodCall} from "./MethodCall";
 import {Variable} from "./Variable";
-import {convertToPosition} from "./Util";
+import {Range, Position} from "vscode";
+import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 
 /**
  * This class implements the JavaParserListener and is therefore used to initialize the Ast data structure.
@@ -18,14 +19,19 @@ export class JavaAstListener implements JavaParserListener {
     }
 
     enterClassDeclaration(ctx: ClassDeclarationContext) {
-        const start = convertToPosition(ctx.start.line, ctx.start.charPositionInLine);
-        const stop = ctx.stop ? convertToPosition(ctx.stop!.line, ctx.stop!.charPositionInLine) : start;
+        const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
+        const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine) : start;
+        const idRange = JavaAstListener.getIdRange(ctx.IDENTIFIER());
+
         this.ast.classDeclarations.push(
-            new ClassDeclaration(ctx.IDENTIFIER().text, start, stop, ctx)
+            new ClassDeclaration(idRange, start, stop)
         );
     }
 
     enterMethodDeclaration(ctx: MethodDeclarationContext) {
+        console.log(ctx.IDENTIFIER().text, ctx.IDENTIFIER().symbol.charPositionInLine, ctx.IDENTIFIER().symbol.line);
+        const idRange = JavaAstListener.getIdRange(ctx.IDENTIFIER());
+
         // get class of method
         const c: ClassDeclarationContext = ctx.parent?.parent?.parent?.parent as ClassDeclarationContext;
         const className = c.IDENTIFIER().text
@@ -33,24 +39,25 @@ export class JavaAstListener implements JavaParserListener {
         // get method type
         const type = ctx.typeTypeOrVoid().text;
 
-        const start = convertToPosition(ctx.start.line, ctx.start.charPositionInLine);
-        const stop = ctx.stop ? convertToPosition(ctx.stop!.line, ctx.stop!.charPositionInLine) : start;
+        const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
+        const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine) : start;
 
         // collect param types and param names of method declaration
         const params = [];
         if (ctx.formalParameters().formalParameterList()) {
             for (let p of ctx.formalParameters().formalParameterList()!.formalParameter()) {
-                const pStart = convertToPosition(p.start.line, p.start.charPositionInLine);
-                const pStop = p.stop ? convertToPosition(p.stop!.line, p.stop!.charPositionInLine) : pStart;
+                const pStart = new Position(p.start.line - 1, p.start.charPositionInLine);
+                const pStop = p.stop ? new Position(p.stop!.line - 1, p.stop!.charPositionInLine) : pStart;
+                const pidRange = JavaAstListener.getIdRange(p.variableDeclaratorId().IDENTIFIER());
                 params.push(new Variable(
-                    p.variableDeclaratorId().text, pStart, pStop, p, p.typeType().text, undefined)
+                    pidRange, pStart, pStop, p.typeType().text, undefined)
                 );
             }
         }
 
         this.ast.methodDeclarations.push(
             new MethodDeclaration(
-                ctx.IDENTIFIER().text, start, stop, ctx, className, type, params
+                idRange, start, stop, className, type, params
             )
         );
     }
@@ -64,11 +71,21 @@ export class JavaAstListener implements JavaParserListener {
             }
         }
 
-        const start = convertToPosition(ctx.start.line, ctx.start.charPositionInLine);
-        const stop = ctx.stop ? convertToPosition(ctx.stop!.line, ctx.stop!.charPositionInLine) : start;
+        const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
+        const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine) : start;
+        const idRange = ctx.IDENTIFIER() ? JavaAstListener.getIdRange(ctx.IDENTIFIER()!) : undefined;
 
         this.ast.methodCalls.push(
-            new MethodCall(ctx.IDENTIFIER()?.text, start, stop, ctx, args)
+            new MethodCall(idRange, start, stop, args)
         );
+    }
+
+    private static getIdRange(identifier: TerminalNode): Range {
+        const idStart = new Position(identifier.symbol.line - 1, identifier.symbol.charPositionInLine);
+        const idStop = new Position(
+            identifier.symbol.line - 1,
+            identifier.symbol.charPositionInLine + identifier.text.length
+        );
+        return new Range(idStart, idStop);
     }
 }

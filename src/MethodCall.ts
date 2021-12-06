@@ -1,12 +1,11 @@
-import {RuleNode} from "antlr4ts/tree";
 import {Target} from "./Target";
-import * as vscode from 'vscode';
+import {Range, Position} from 'vscode';
 
 export class MethodCall extends Target {
     args: string[];
 
-    constructor(identifier: string | undefined, start: vscode.Position , end: vscode.Position, node: RuleNode, args: string[]) {
-        super(identifier, start, end, node);
+    constructor(identifier: Range | undefined, start: Position , end: Position, args: string[]) {
+        super(identifier, start, end);
         this.args = args;
     }
 }

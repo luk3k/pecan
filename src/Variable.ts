@@ -1,14 +1,13 @@
 import {Target} from "./Target";
-import {RuleNode} from "antlr4ts/tree";
-import * as vscode from 'vscode';
+import {Range, Position} from 'vscode';
 
 export class Variable extends Target {
-    type: any;
-    value: any;
+    type: string | undefined;
+    value: string | undefined;
 
-    constructor(identifier: string | undefined, start: vscode.Position, end: vscode.Position, node: RuleNode, type: any,
-                value: any) {
-        super(identifier, start, end, node);
+    constructor(identifier: Range | undefined, start: Position, end: Position,
+                type: string | undefined, value: string | undefined) {
+        super(identifier, start, end);
         this.type = type;
         this.value = value;
     }
