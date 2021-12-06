@@ -1,10 +1,10 @@
 import {RuleNode} from "antlr4ts/tree";
-import {Interval} from "antlr4ts/misc";
 import {Target} from "./Target";
+import * as vscode from 'vscode';
 
 export class ClassDeclaration extends Target {
 
-    constructor(identifier: string, range: Interval, line: number, node: RuleNode) {
-        super(identifier, range, line, node);
+    constructor(identifier: string, start: vscode.Position, end: vscode.Position, node: RuleNode) {
+        super(identifier, start, end, node);
     }
 }

@@ -1,5 +1,7 @@
 import {Interval} from "antlr4ts/misc";
 import {RuleNode} from "antlr4ts/tree";
+import * as vscode from 'vscode';
+import {Position} from "vscode";
 
 /**
  * The Target class is used to represent a target in the editor. E.g. a target could be a class declaration or a
@@ -7,14 +9,14 @@ import {RuleNode} from "antlr4ts/tree";
  */
 export class Target {
     identifier: string | undefined;
-    range: Interval;
-    line: number;
+    start: vscode.Position;
+    end: vscode.Position;
     node: RuleNode;
 
-    constructor(identifier: string | undefined, range: Interval, line: number, node: RuleNode) {
+    constructor(identifier: string | undefined, start: vscode.Position, end: vscode.Position, node: RuleNode) {
         this.identifier = identifier;
-        this.range = range;
-        this.line = line;
+        this.start = start;
+        this.end = end;
         this.node = node;
     }
 }
