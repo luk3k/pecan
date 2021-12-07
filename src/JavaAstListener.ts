@@ -7,6 +7,7 @@ import {MethodCall} from "./MethodCall";
 import {Variable} from "./Variable";
 import {Range, Position} from "vscode";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
+import {ParserRuleContext} from "antlr4ts/ParserRuleContext";
 
 /**
  * This class implements the JavaParserListener and is therefore used to initialize the Ast data structure.
@@ -29,7 +30,6 @@ export class JavaAstListener implements JavaParserListener {
     }
 
     enterMethodDeclaration(ctx: MethodDeclarationContext) {
-        console.log(ctx.IDENTIFIER().text, ctx.IDENTIFIER().symbol.charPositionInLine, ctx.IDENTIFIER().symbol.line);
         const idRange = JavaAstListener.getIdRange(ctx.IDENTIFIER());
 
         // get class of method
@@ -37,7 +37,15 @@ export class JavaAstListener implements JavaParserListener {
         const className = c.IDENTIFIER().text
 
         // get method type
-        const type = ctx.typeTypeOrVoid().text;
+        const typeStart = new Position(
+            ctx.typeTypeOrVoid().start.line - 1,
+            ctx.typeTypeOrVoid().start.charPositionInLine
+        );
+        const typeStop = new Position(
+            ctx.typeTypeOrVoid().start.line - 1,
+            ctx.typeTypeOrVoid().start.charPositionInLine + ctx.typeTypeOrVoid().text.length
+        );
+        const typeRange = new Range(typeStart, typeStop);
 
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
         const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine) : start;
@@ -50,14 +58,14 @@ export class JavaAstListener implements JavaParserListener {
                 const pStop = p.stop ? new Position(p.stop!.line - 1, p.stop!.charPositionInLine) : pStart;
                 const pidRange = JavaAstListener.getIdRange(p.variableDeclaratorId().IDENTIFIER());
                 params.push(new Variable(
-                    pidRange, pStart, pStop, p.typeType().text, undefined)
+                    pidRange, pStart, pStop, JavaAstListener.getRangeFromContext(p.typeType()), undefined)
                 );
             }
         }
 
         this.ast.methodDeclarations.push(
             new MethodDeclaration(
-                idRange, start, stop, className, type, params
+                idRange, start, stop, className, typeRange, params
             )
         );
     }
@@ -67,7 +75,8 @@ export class JavaAstListener implements JavaParserListener {
         const args = [];
         if (ctx.expressionList()) {
             for (let exp of ctx.expressionList()!.expression()) {
-                args.push(exp.text);
+                let argRange = JavaAstListener.getRangeFromContext(exp);
+                args.push(argRange);
             }
         }
 
@@ -78,6 +87,12 @@ export class JavaAstListener implements JavaParserListener {
         this.ast.methodCalls.push(
             new MethodCall(idRange, start, stop, args)
         );
+    }
+
+    private static getRangeFromContext(ctx: ParserRuleContext): Range {
+        const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
+        const stop = new Position(ctx.start.line - 1, ctx.start.charPositionInLine + ctx.text.length);
+        return new Range(start, stop);
     }
 
     private static getIdRange(identifier: TerminalNode): Range {

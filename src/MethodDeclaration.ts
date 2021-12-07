@@ -4,11 +4,11 @@ import {Range, Position} from 'vscode';
 
 export class MethodDeclaration extends Target {
     className: string;
-    returnType: string;
+    returnType: Range;
     params: Variable[];
 
     constructor(identifier: Range, start: Position, end: Position,
-                className: string, returnType: string, params: Variable[]) {
+                className: string, returnType: Range, params: Variable[]) {
         super(identifier, start, end);
         this.className = className;
         this.returnType = returnType;
