@@ -1,5 +1,5 @@
 import {Range, Position, TextEditorDecorationType, DecorationOptions, TextEditor} from 'vscode';
-import {registerTargetWithDecorationType, renderActiveTargets} from "./index";
+import {registerTarget, unregisterTarget, renderActiveTargets} from "./index";
 
 /**
  * The Target class is used to represent a target in the editor. E.g. a target could be a class declaration or a
@@ -21,7 +21,12 @@ export class Target {
     }
 
     applyStyle(decorationType: TextEditorDecorationType, editor: TextEditor): void {
-        registerTargetWithDecorationType(this, decorationType);
+        registerTarget(this, decorationType);
+        renderActiveTargets(editor, decorationType);
+    }
+
+    removeStyle(decorationType: TextEditorDecorationType, editor: TextEditor): void {
+        unregisterTarget(this, decorationType);
         renderActiveTargets(editor, decorationType);
     }
 }

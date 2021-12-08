@@ -7,15 +7,17 @@ import * as vscode from 'vscode';
  * @param regex the regular expression
  * @return Target[] returns an array of matched targets
  */
-export function findTargets(document: vscode.TextDocument, regex: RegExp): Target[] {
+export function findTargets(document: vscode.TextDocument, regex: string | RegExp): Target[] {
+    regex = typeof regex === 'string' ? new RegExp(regex, 'g') : regex;
+    regex = regex.global ? regex : new RegExp(regex, 'g');
     const text = document.getText();
     const targets: Target[] = [];
-    let matches: RegExpExecArray | null;
-    while ((matches = regex.exec(text)) !== null) {
-        const line = document.lineAt(document.positionAt(matches.index).line);
-        const indexOf = line.text.indexOf(matches[0]);
+    let matches = text.matchAll(regex);
+    for (let m of matches) {
+        const line = document.lineAt(document.positionAt(m.index!).line);
+        const indexOf = line.text.indexOf(m[0]);
         const startPos = new vscode.Position(line.lineNumber, indexOf);
-        const endPos= new vscode.Position(line.lineNumber, indexOf + matches[0].length);
+        const endPos = new vscode.Position(line.lineNumber, indexOf + m[0].length);
         targets.push(new Target(new vscode.Range(startPos, endPos), startPos, endPos));
     }
     return targets;
