@@ -1,11 +1,11 @@
 import {Target} from "./Target";
-import {Range, Position} from 'vscode';
+import {Range, Position, TextDocument} from 'vscode';
 
 export class MethodCall extends Target {
-    args: Range[];
+    args: Target[];
 
-    constructor(identifier: Range | undefined, start: Position , end: Position, args: Range[]) {
-        super(identifier, start, end);
+    constructor(identifier: Range | undefined, start: Position , end: Position, document: TextDocument, args: Target[]) {
+        super(identifier, start, end, document);
         this.args = args;
     }
 }

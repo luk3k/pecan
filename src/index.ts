@@ -3,11 +3,13 @@ import {DecorationOptions, TextEditor, TextEditorDecorationType} from "vscode";
 
 export * from './Ast';
 export * from './globals';
+export * from './DefaultCodeLensProvider';
 
 const activeTargets: Map<TextEditorDecorationType, Target[]> = new Map<TextEditorDecorationType, Target[]>()
 
 export function registerTarget(target: Target, decorationType: TextEditorDecorationType): void {
     if(activeTargets.has(decorationType)) {
+        if(activeTargets.get(decorationType)!.findIndex((t) => t.isEqual(target)) !== -1) return;
         activeTargets.get(decorationType)!.push(target);
     } else {
         activeTargets.set(decorationType, [target]);
@@ -16,7 +18,7 @@ export function registerTarget(target: Target, decorationType: TextEditorDecorat
 
 export function unregisterTarget(target: Target, decorationType: TextEditorDecorationType): void {
     if(activeTargets.has(decorationType)) {
-        const i: number = activeTargets.get(decorationType)!.indexOf(target);
+        const i: number = activeTargets.get(decorationType)!.findIndex((t) => t.isEqual(target));
         activeTargets.get(decorationType)?.splice(i, 1);
     }
 }
@@ -28,4 +30,8 @@ export function renderActiveTargets(editor: TextEditor, decorationType: TextEdit
     });
 
     editor.setDecorations(decorationType, decorationOptions);
+}
+
+export function registerCodelensProvider() {
+
 }

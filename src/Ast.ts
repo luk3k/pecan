@@ -7,9 +7,11 @@ import {JavaAstListener} from "./JavaAstListener";
 import {JavaParserListener} from "../parsers/JavaParserListener";
 import {ClassDeclaration} from "./ClassDeclaration";
 import {MethodCall} from "./MethodCall";
+import {TextDocument} from "vscode";
 
 interface Ast {
     readonly tree: ParseTree;
+    readonly document: TextDocument;
     classDeclarations: ClassDeclaration[];
     methodDeclarations: MethodDeclaration[];
     methodCalls: MethodCall[];
@@ -17,16 +19,18 @@ interface Ast {
 
 export class JavaAst implements Ast {
     readonly tree: ParseTree;
+    readonly document: TextDocument;
     classDeclarations: ClassDeclaration[] = [];
     methodDeclarations: MethodDeclaration[] = [];
     methodCalls: MethodCall[] = [];
 
     /**
-     * Initialize the ParseTree object for a given file
-     * @param source the source code to be parsed
+     * Initialize the ParseTree object for a given fil
+     * @param document the vscode document which also includes the text
      */
-    constructor(source: string) {
-        this.tree = this.parse(source);
+    constructor(document: TextDocument) {
+        this.document = document;
+        this.tree = this.parse(document.getText());
         this.init();
     }
 
@@ -48,14 +52,7 @@ export class JavaAst implements Ast {
      * the relevant data accordingly.
      */
     init() {
-        const astListener: JavaParserListener = new JavaAstListener(this);
+        const astListener: JavaParserListener = new JavaAstListener(this, this.document);
         ParseTreeWalker.DEFAULT.walk(astListener, this.tree);
     }
-}
-
-// count all method references
-let javaAst = new JavaAst('example/Test.java');
-for (let m of javaAst.methodDeclarations) {
-    let calls = javaAst.methodCalls.filter(x => x.identifier == m.identifier);
-    console.log(`Calls for ${m.identifier}: ${calls.length}`);
 }

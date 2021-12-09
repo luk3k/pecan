@@ -1,13 +1,13 @@
 import {Target} from "./Target";
-import {Range, Position} from 'vscode';
+import {Range, Position, TextDocument} from 'vscode';
 
 export class Variable extends Target {
-    type: Range | undefined;
-    value: Range | undefined;
+    type: Target | undefined;
+    value: Target | undefined;
 
-    constructor(identifier: Range | undefined, start: Position, end: Position,
-                type: Range | undefined, value: Range | undefined) {
-        super(identifier, start, end);
+    constructor(identifier: Range | undefined, start: Position, end: Position, document: TextDocument,
+                type: Target | undefined, value: Target | undefined) {
+        super(identifier, start, end, document);
         this.type = type;
         this.value = value;
     }
