@@ -66,9 +66,26 @@ export class JavaAstListener implements JavaParserListener {
             }
         }
 
+        // save the method body as targets
+        let bodyTarget = this.getTargetFromContext(ctx.methodBody());
+        if (ctx.methodBody().block()) {
+            const blockList = ctx.methodBody().block()!.blockStatement();
+            const bodyStart = new Position(blockList[0].start.line - 1, blockList[0].start.charPositionInLine);
+            const bodyStop = blockList[blockList.length - 1].stop ?
+                new Position(
+                    blockList[blockList.length - 1].stop!.line,
+                    blockList[blockList.length - 1].stop!.charPositionInLine
+                ) :
+                new Position(
+                    blockList[blockList.length - 1].start.line - 1,
+                blockList[blockList.length - 1].start.charPositionInLine + blockList[blockList.length - 1].text.length
+            );
+            bodyTarget = new Target(new Range(bodyStart, bodyStop), bodyStart, bodyStop, this.document);
+        }
+
         this.ast.methodDeclarations.push(
             new MethodDeclaration(
-                idRange, start, stop, this.document, className, typeTarget, params
+                idRange, start, stop, this.document, className, typeTarget, params, bodyTarget
             )
         );
     }
@@ -94,7 +111,9 @@ export class JavaAstListener implements JavaParserListener {
 
     private getTargetFromContext(ctx: ParserRuleContext): Target {
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
-        const stop = new Position(ctx.start.line - 1, ctx.start.charPositionInLine + ctx.text.length);
+        const stop = ctx.stop ?
+            new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine) :
+            new Position(ctx.start.line - 1, ctx.start.charPositionInLine + ctx.text.length);
         const targetRange = new Range(start, stop);
         return new Target(targetRange, start, stop, this.document);
     }

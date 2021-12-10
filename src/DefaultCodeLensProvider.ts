@@ -10,15 +10,13 @@ import {Target} from "./Target";
 
 export class DefaultCodeLensProvider implements CodeLensProvider {
 
-    activeCodelenses: CodeLens[] = [];
+    private codeLenses: CodeLens[] = [];
 
     async provideCodeLenses(document: TextDocument): Promise<CodeLens[]> {
-        return this.activeCodelenses;
+        return this.codeLenses;
     }
 
-    attachCodeLens(range: Range, command: Command) {
-        let c: CodeLens = new CodeLens(range, command);
-        this.activeCodelenses.push(c);
+    attachCodeLens(codeLens: CodeLens): void {
+        this.codeLenses.push(codeLens);
     }
-
 }

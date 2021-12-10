@@ -5,9 +5,9 @@ import {
     DecorationOptions,
     TextEditor,
     TextDocument,
-    Command
+    Command, CodeLens, DecorationInstanceRenderOptions, ThemableDecorationAttachmentRenderOptions
 } from 'vscode';
-import {registerTarget, unregisterTarget, renderActiveTargets} from "./index";
+import {registerTarget, unregisterTarget, renderActiveTargets, resetDecorations} from "./index";
 import * as vscode from 'vscode';
 import {DefaultCodeLensProvider} from "./DefaultCodeLensProvider";
 
@@ -20,7 +20,7 @@ export class Target {
     start: Position;
     end: Position;
     readonly document: vscode.TextDocument;
-    decorationOptions: DecorationOptions;
+    readonly decorationOptions: DecorationOptions;
 
     constructor(identifier: Range | undefined, start: Position, end: Position, document: TextDocument) {
         this.identifier = identifier;
@@ -41,16 +41,40 @@ export class Target {
         } else {
             registerTarget(this, decorationType);
         }
-        renderActiveTargets(editor, decorationType);
+        renderActiveTargets(editor);
+    }
+
+    applyTextDecoration(decorationType: TextEditorDecorationType,text: ThemableDecorationAttachmentRenderOptions, position: string, editor: TextEditor) {
+        if(this.decorationOptions.renderOptions === undefined) this.decorationOptions.renderOptions = {} as DecorationInstanceRenderOptions;
+        if(position === 'before') {
+            this.decorationOptions.renderOptions.before = text;
+        } else if(position === 'after') {
+            this.decorationOptions.renderOptions.after = text;
+        }
+        // TODO renderoption stay in target with applyStyle
+        unregisterTarget(this, decorationType);
+        registerTarget(this, decorationType);
+        renderActiveTargets(editor);
     }
 
     applyCodelens(provider: DefaultCodeLensProvider, command: Command): void {
-        provider.attachCodeLens(new Range(this.start, this.end), command);
+        provider.attachCodeLens(new CodeLens(new Range(this.start, this.end), command));
     }
 
     removeStyle(decorationType: TextEditorDecorationType, editor: TextEditor): void {
         unregisterTarget(this, decorationType);
-        renderActiveTargets(editor, decorationType);
+        renderActiveTargets(editor);
+    }
+
+    removeTextDecoration(decorationType: TextEditorDecorationType, position: string, editor: TextEditor): void {
+        if(this.decorationOptions.renderOptions === undefined) return;
+        if(position === 'before') {
+            this.decorationOptions.renderOptions.before = undefined;
+        } else if(position === 'after') {
+            this.decorationOptions.renderOptions.after = undefined;
+        }
+        unregisterTarget(this, decorationType);
+        renderActiveTargets(editor);
     }
 
     getText(): string {
