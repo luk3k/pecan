@@ -4,7 +4,7 @@ import {Range, Position, TextDocument} from 'vscode';
 
 export class MethodDeclaration extends Target {
     className: string;
-    returnType: Target;
+    returnType: Target | undefined;
     params: Variable[];
     methodBody: Target;
 

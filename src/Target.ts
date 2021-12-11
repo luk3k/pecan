@@ -81,6 +81,10 @@ export class Target {
         return this.document.getText(new Range(this.start, this.end));
     }
 
+    getIdentifierText(): string {
+        return this.identifier ? this.document.getText(this.identifier) : this.getText();
+    }
+
     isEqual(other: Target): boolean {
         if(this.identifier) {
             return other.identifier !== undefined &&
