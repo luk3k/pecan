@@ -66,22 +66,7 @@ export class JavaAstListener implements JavaParserListener {
             }
         }
 
-        // save the method body as targets
         let bodyTarget = this.getTargetFromContext(ctx.methodBody());
-        if (ctx.methodBody().block()) {
-            const blockList = ctx.methodBody().block()!.blockStatement();
-            const bodyStart = new Position(blockList[0].start.line - 1, blockList[0].start.charPositionInLine);
-            const bodyStop = blockList[blockList.length - 1].stop ?
-                new Position(
-                    blockList[blockList.length - 1].stop!.line,
-                    blockList[blockList.length - 1].stop!.charPositionInLine
-                ) :
-                new Position(
-                    blockList[blockList.length - 1].start.line - 1,
-                blockList[blockList.length - 1].start.charPositionInLine + blockList[blockList.length - 1].text.length
-            );
-            bodyTarget = new Target(new Range(bodyStart, bodyStop), bodyStart, bodyStop, this.document);
-        }
 
         this.ast.methodDeclarations.push(
             new MethodDeclaration(
