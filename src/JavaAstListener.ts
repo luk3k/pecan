@@ -80,8 +80,14 @@ export class JavaAstListener implements JavaParserListener {
         const args = [];
         if (ctx.expressionList()) {
             for (let exp of ctx.expressionList()!.expression()) {
-                console.log(exp.start, exp.stop);
-                const argTarget = this.getTargetFromContext(exp);
+                let argStart = new Position(exp.start.line - 1, exp.start.charPositionInLine);
+                let argRange = exp.start.stopIndex - exp.start.startIndex + 1;
+                let argStop = new Position(exp.start.line - 1, exp.start.charPositionInLine + argRange);
+                if (exp.stop) {
+                    argRange = exp.stop!.stopIndex - exp.start.startIndex + 1;
+                    argStop = new Position(exp.stop!.line - 1, exp.start.charPositionInLine + argRange);
+                }
+                const argTarget = new Target(new Range(argStart, argStop), argStart, argStop, this.document);
                 args.push(argTarget);
             }
         }
