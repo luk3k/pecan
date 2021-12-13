@@ -1,5 +1,10 @@
 import {JavaParserListener} from "../parsers/JavaParserListener";
-import {ClassDeclarationContext, MethodCallContext, MethodDeclarationContext} from "../parsers/JavaParser";
+import {
+    ClassDeclarationContext,
+    MethodCallContext,
+    MethodDeclarationContext,
+    TypeTypeContext
+} from "../parsers/JavaParser";
 import {ClassDeclaration} from "./ClassDeclaration";
 import {JavaAst} from "./Ast";
 import {MethodDeclaration} from "./MethodDeclaration";
@@ -9,6 +14,7 @@ import {Range, Position, TextDocument} from "vscode";
 import {TerminalNode} from "antlr4ts/tree/TerminalNode";
 import {ParserRuleContext} from "antlr4ts/ParserRuleContext";
 import {Target} from "./Target";
+import {type} from "os";
 
 /**
  * This class implements the JavaParserListener and is therefore used to initialize the Ast data structure.
@@ -80,7 +86,6 @@ export class JavaAstListener implements JavaParserListener {
         const args = [];
         if (ctx.expressionList()) {
             for (let exp of ctx.expressionList()!.expression()) {
-                console.log(exp.start, exp.stop);
                 const argTarget = this.getTargetFromContext(exp);
                 args.push(argTarget);
             }
@@ -97,9 +102,12 @@ export class JavaAstListener implements JavaParserListener {
 
     private getTargetFromContext(ctx: ParserRuleContext): Target {
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
-        const stop = ctx.stop ?
-            new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine + 1) :
-            new Position(ctx.start.line - 1, ctx.start.charPositionInLine + ctx.text.length);
+        let range = ctx.start.stopIndex - ctx.start.startIndex + 1;
+        let stop = new Position(ctx.start.line - 1, ctx.start.charPositionInLine + range);
+        if (ctx.stop) {
+            range = ctx.stop!.stopIndex - ctx.start.startIndex + 1;
+            stop = new Position(ctx.stop!.line - 1, ctx.start.charPositionInLine + range);
+        }
         const targetRange = new Range(start, stop);
         return new Target(targetRange, start, stop, this.document);
     }
