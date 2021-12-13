@@ -26,6 +26,7 @@ export function registerTarget(target: Target, decorationType: TextEditorDecorat
 export function unregisterTarget(target: Target, decorationType: TextEditorDecorationType): void {
     if(activeTargets.has(decorationType)) {
         const i: number = activeTargets.get(decorationType)!.findIndex(t => t.isEqual(target));
+        if(i === -1) return;
         activeTargets.get(decorationType)?.splice(i, 1);
     }
 }
