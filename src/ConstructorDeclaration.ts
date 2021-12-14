@@ -1,20 +1,18 @@
 import {Target} from "./Target";
 import {Variable} from "./Variable";
-import {Range, Position, TextDocument} from 'vscode';
+import {Position, Range, TextDocument} from "vscode";
 import {ClassDeclaration} from "./ClassDeclaration";
 
-export class MethodDeclaration extends Target {
+export class ConstructorDeclaration extends Target {
     classDeclaration: ClassDeclaration | null = null;
-    returnType: Target | null;
     params: Variable[];
-    methodBody: Target;
+    body: Target;
 
     constructor(identifier: Range, start: Position, end: Position, document: TextDocument,
-                classDeclaration: ClassDeclaration | null, returnType: Target, params: Variable[], methodBody: Target) {
+                classDeclaration: ClassDeclaration | null, params: Variable[], body: Target) {
         super(identifier, start, end, document);
         this.classDeclaration = classDeclaration;
-        this.returnType = returnType;
         this.params = params;
-        this.methodBody = methodBody;
+        this.body = body;
     }
 }

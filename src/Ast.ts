@@ -8,6 +8,7 @@ import {JavaParserListener} from "../parsers/JavaParserListener";
 import {ClassDeclaration} from "./ClassDeclaration";
 import {MethodCall} from "./MethodCall";
 import {TextDocument} from "vscode";
+import {Target} from "./Target";
 
 interface Ast {
     readonly tree: ParseTree;
@@ -54,5 +55,25 @@ export class JavaAst implements Ast {
     init() {
         const astListener: JavaParserListener = new JavaAstListener(this, this.document);
         ParseTreeWalker.DEFAULT.walk(astListener, this.tree);
+        this.setClassDeclarationsForMethods();
+    }
+
+    private setClassDeclarationsForMethods() {
+        for (let c of this.classDeclarations) {
+            let classMethods = c.methodDeclarations;
+            console.log(classMethods.map(cm => cm.getIdentifierText()));
+            let filtered = this.methodDeclarations.filter(m => {
+                for (let cm of c.methodDeclarations) {
+                    if (cm.isEqual(m)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            filtered.forEach(m => {
+                m.classDeclaration = c;
+            });
+            console.log(filtered.map(f => f.classDeclaration));
+        }
     }
 }
