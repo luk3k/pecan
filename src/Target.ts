@@ -3,13 +3,16 @@ import {
     Position,
     TextEditorDecorationType,
     DecorationOptions,
-    TextEditor,
     TextDocument,
-    Command, CodeLens, DecorationInstanceRenderOptions, ThemableDecorationAttachmentRenderOptions
+    Command,
+    CodeLens,
+    ThemableDecorationAttachmentRenderOptions,
+    DecorationRenderOptions,
+    window
 } from 'vscode';
-import {registerTarget, unregisterTarget, renderActiveTargets, resetDecorations} from "./index";
 import * as vscode from 'vscode';
 import {DefaultCodeLensProvider} from "./DefaultCodeLensProvider";
+import {getDecorationController} from "./index";
 
 /**
  * The Target class is used to represent a target in the editor. E.g. a target could be a class declaration or a
@@ -32,49 +35,48 @@ export class Target {
         } as DecorationOptions;
     }
 
-    applyStyle(decorationType: TextEditorDecorationType, editor: TextEditor, identifier: boolean = false): void {
+    applyStyle(decorationType: TextEditorDecorationType, identifier: boolean = false): void {
         if(identifier) {
             if(!this.identifier) throw TypeError('Identifier is undefined');
             const r: Range = this.identifier!;
             const t: Target = new Target(r, r.start, r.end, this.document);
-            registerTarget(t, decorationType);
+            getDecorationController(this.document.fileName)?.decorateTarget(t, decorationType);
         } else {
-            registerTarget(this, decorationType);
+            getDecorationController(this.document.fileName)?.decorateTarget(this, decorationType);
         }
-        renderActiveTargets(editor);
     }
 
-    applyTextDecoration(decorationType: TextEditorDecorationType,text: ThemableDecorationAttachmentRenderOptions, position: string, editor: TextEditor) {
-        if(this.decorationOptions.renderOptions === undefined) this.decorationOptions.renderOptions = {} as DecorationInstanceRenderOptions;
+    applyTextDecoration(textDecoration: ThemableDecorationAttachmentRenderOptions, position: string, identifier: boolean = false): TextEditorDecorationType {
+        const decorationOptions: DecorationRenderOptions = {};
         if(position === 'before') {
-            this.decorationOptions.renderOptions.before = text;
+            decorationOptions.before = textDecoration;
         } else if(position === 'after') {
-            this.decorationOptions.renderOptions.after = text;
+            decorationOptions.after = textDecoration;
         }
-        // TODO renderoption stay in target with applyStyle
-        unregisterTarget(this, decorationType);
-        registerTarget(this, decorationType);
-        renderActiveTargets(editor);
+
+        const decorationType: TextEditorDecorationType = window.createTextEditorDecorationType(decorationOptions);
+        this.applyStyle(decorationType, identifier);
+
+        return decorationType;
     }
 
     applyCodelens(provider: DefaultCodeLensProvider, command: Command): void {
         provider.attachCodeLens(new CodeLens(new Range(this.start, this.end), command));
     }
 
-    removeStyle(decorationType: TextEditorDecorationType, editor: TextEditor): void {
-        unregisterTarget(this, decorationType);
-        renderActiveTargets(editor);
+    removeStyle(decorationType: TextEditorDecorationType, identifier: boolean = false): void {
+        if(identifier) {
+            if(!this.identifier) throw TypeError('Identifier is undefined');
+            const r: Range = this.identifier!;
+            const t: Target = new Target(r, r.start, r.end, this.document);
+            getDecorationController(this.document.fileName)?.removeDecoration(t, decorationType);
+        } else {
+            getDecorationController(this.document.fileName)?.removeDecoration(this, decorationType);
+        }
     }
 
-    removeTextDecoration(decorationType: TextEditorDecorationType, position: string, editor: TextEditor): void {
-        if(this.decorationOptions.renderOptions === undefined) return;
-        if(position === 'before') {
-            this.decorationOptions.renderOptions.before = undefined;
-        } else if(position === 'after') {
-            this.decorationOptions.renderOptions.after = undefined;
-        }
-        unregisterTarget(this, decorationType);
-        renderActiveTargets(editor);
+    removeTextDecoration(decorationType: TextEditorDecorationType): void {
+        this.removeStyle(decorationType);
     }
 
     getText(): string {

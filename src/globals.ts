@@ -32,5 +32,5 @@ export function applyStyle(ranges: vscode.Range[], decorationType: TextEditorDec
         targets.push(t);
     });
 
-    targets.forEach(t => t.applyStyle(decorationType, editor));
+    targets.forEach(t => t.applyStyle(decorationType));
 }

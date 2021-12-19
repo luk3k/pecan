@@ -1,5 +1,5 @@
-import {Target} from "./Target";
-import {DecorationOptions, TextEditor, TextEditorDecorationType} from "vscode";
+import {TextEditor} from "vscode";
+import {DecorationController} from "./DecorationController";
 
 //Export Classes
 export * from './Target';
@@ -12,40 +12,26 @@ export * from './Variable';
 export * from './Ast';
 export * from './globals';
 
-const activeTargets: Map<TextEditorDecorationType, Target[]> = new Map<TextEditorDecorationType, Target[]>();
+let decorationControllers: Map<string ,DecorationController> = new Map<string, DecorationController>();
 
-export function registerTarget(target: Target, decorationType: TextEditorDecorationType): void {
-    if(activeTargets.has(decorationType)) {
-        if(activeTargets.get(decorationType)!.findIndex(t => t.isEqual(target)) !== -1) return;
-        activeTargets.get(decorationType)!.push(target);
+export function registerTextEditor(editor: TextEditor): void {
+    if(decorationControllers.has(editor.document.fileName)) {
+        decorationControllers.get(editor.document.fileName)?.setEditor(editor);
+        decorationControllers.get(editor.document.fileName)?.renderTargets();
     } else {
-        activeTargets.set(decorationType, [target]);
+        decorationControllers.set(editor.document.fileName, new DecorationController(editor));
     }
 }
 
-export function unregisterTarget(target: Target, decorationType: TextEditorDecorationType): void {
-    if(activeTargets.has(decorationType)) {
-        const i: number = activeTargets.get(decorationType)!.findIndex(t => t.isEqual(target));
-        if(i === -1) return;
-        activeTargets.get(decorationType)?.splice(i, 1);
-    }
+export function removeAllDecorations(editor: TextEditor) {
+    decorationControllers.get(editor.document.fileName)?.removeAllDecorations();
 }
 
-export function resetDecorations(decorationType: TextEditorDecorationType) {
-    activeTargets.delete(decorationType);
+export function getDecorationController(fileName: string): DecorationController | undefined {
+    return decorationControllers.get(fileName);
 }
 
-export function renderActiveTargets(editor: TextEditor): void {
-    activeTargets.forEach((targets, decorationType) => {
-        const decorationOptions: DecorationOptions[] = [];
-        targets.forEach(t => {
-            decorationOptions.push(t.decorationOptions);
-        });
-
-        editor.setDecorations(decorationType, decorationOptions);
-    });
-}
-
-export function registerCodelensProvider() {
-
+export function unregisterTextEditor(editor: TextEditor) {
+    //TODO cleanup in Controller?
+    decorationControllers.delete(editor.document.fileName);
 }
