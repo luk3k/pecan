@@ -1,22 +1,19 @@
-import {
-    CancellationToken,
-    CodeLens,
-    CodeLensProvider, Command,
-    ProviderResult, Range,
-    TextDocument,
-    TextEditorDecorationType
-} from 'vscode';
-import {Target} from "./Target";
+import {CodeLens, CodeLensProvider, Event, EventEmitter, TextDocument} from 'vscode';
+import {onDidChangeCodeLenses} from './CodeLensController'
+import {getCodeLensController} from "./index";
 
 export class DefaultCodeLensProvider implements CodeLensProvider {
 
-    private codeLenses: CodeLens[] = [];
+    private _onDidChangeCodeLenses: EventEmitter<void> = new EventEmitter<void>();
+    public readonly onDidChangeCodeLenses: Event<void> = this._onDidChangeCodeLenses.event;
 
-    async provideCodeLenses(document: TextDocument): Promise<CodeLens[]> {
-        return this.codeLenses;
+    constructor() {
+        onDidChangeCodeLenses(() => {
+            this._onDidChangeCodeLenses.fire();
+        });
     }
 
-    attachCodeLens(codeLens: CodeLens): void {
-        this.codeLenses.push(codeLens);
+    async provideCodeLenses(document: TextDocument): Promise<CodeLens[]> {
+        return getCodeLensController(document.fileName)?.getCodeLenses() ?? [];
     }
 }

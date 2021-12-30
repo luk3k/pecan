@@ -12,7 +12,7 @@ import {
 } from 'vscode';
 import * as vscode from 'vscode';
 import {DefaultCodeLensProvider} from "./DefaultCodeLensProvider";
-import {getDecorationController} from "./index";
+import {getCodeLensController, getDecorationController} from "./index";
 
 /**
  * The Target class is used to represent a target in the editor. E.g. a target could be a class declaration or a
@@ -60,8 +60,14 @@ export class Target {
         return decorationType;
     }
 
-    applyCodelens(provider: DefaultCodeLensProvider, command: Command): void {
-        provider.attachCodeLens(new CodeLens(new Range(this.start, this.end), command));
+    applyCodelens(command: Command, identifier: boolean = false): void {
+        let r: Range = new Range(this.start, this.end);
+        if(identifier) {
+            if(!this.identifier) throw TypeError('Identifier is undefined');
+            r = this.identifier!;
+        }
+        const codeLens = new CodeLens(r, command);
+        getCodeLensController(this.document.fileName)?.addCodeLens(codeLens);
     }
 
     removeStyle(decorationType: TextEditorDecorationType, identifier: boolean = false): void {
@@ -77,6 +83,15 @@ export class Target {
 
     removeTextDecoration(decorationType: TextEditorDecorationType): void {
         this.removeStyle(decorationType);
+    }
+
+    removeCodeLenses(identifier: boolean = false) {
+        if(identifier) {
+            if(!this.identifier) throw TypeError('Identifier is undefined');
+            getCodeLensController(this.document.fileName)?.removeCodeLens(this.identifier!);
+        } else {
+            getCodeLensController(this.document.fileName)?.removeCodeLens(new Range(this.start, this.end));
+        }
     }
 
     getText(): string {
