@@ -61,3 +61,9 @@ export function unregisterTextEditor(editor: TextEditor) {
     //TODO cleanup in Controller?
     decorationControllers.delete(editor.document.fileName);
 }
+
+export function unregisterCodeLensControllers() {
+    codeLensProviders.forEach(p => p.dispose());
+    codeLensProviders = new Map<string, Disposable>();
+    codeLensControllers = new Map<string, CodeLensController>();
+}

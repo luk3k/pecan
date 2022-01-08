@@ -11,4 +11,13 @@ export class Variable extends Target {
         this.type = type;
         this.value = value;
     }
+
+    getTypeText(): string {
+        return this.type?.getText() ?? '';
+    }
+
+    getValueText(): string {
+        return this.value?.getText() ?? '';
+    }
+
 }

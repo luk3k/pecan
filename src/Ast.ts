@@ -61,7 +61,6 @@ export class JavaAst implements Ast {
     private setClassDeclarationsForMethods() {
         for (let c of this.classDeclarations) {
             let classMethods = c.methodDeclarations;
-            console.log(classMethods.map(cm => cm.getIdentifierText()));
             let filtered = this.methodDeclarations.filter(m => {
                 for (let cm of c.methodDeclarations) {
                     if (cm.isEqual(m)) {
@@ -73,7 +72,6 @@ export class JavaAst implements Ast {
             filtered.forEach(m => {
                 m.classDeclaration = c;
             });
-            console.log(filtered.map(f => f.classDeclaration));
         }
     }
 }
