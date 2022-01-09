@@ -36,5 +36,4 @@ export class CodeLensController {
     getCodeLenses() {
         return this.codeLenses;
     }
-
 }

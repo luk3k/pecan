@@ -62,4 +62,8 @@ export class DecorationController {
     setEditor(editor: TextEditor) {
         this.editor = editor;
     }
+
+    dispose() {
+        this.decorationTargets.forEach((targets, decorationType) => decorationType.dispose());
+    }
 }

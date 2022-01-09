@@ -58,8 +58,17 @@ export function getCodeLensController(fileName: string): CodeLensController | un
 }
 
 export function unregisterTextEditor(editor: TextEditor) {
-    //TODO cleanup in Controller?
+    decorationControllers.get(editor.document.fileName)?.dispose();
     decorationControllers.delete(editor.document.fileName);
+    codeLensControllers.delete(editor.document.fileName);
+}
+
+export function unregisterAllTextEditors() {
+    for(const fileName of decorationControllers.keys()) {
+        decorationControllers.get(fileName)?.dispose();
+        decorationControllers.delete(fileName);
+    }
+    unregisterCodeLensControllers();
 }
 
 export function unregisterCodeLensControllers() {
