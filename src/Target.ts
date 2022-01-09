@@ -8,7 +8,7 @@ import {
     CodeLens,
     ThemableDecorationAttachmentRenderOptions,
     DecorationRenderOptions,
-    window
+    window, MarkdownString
 } from 'vscode';
 import * as vscode from 'vscode';
 import {DefaultCodeLensProvider} from "./DefaultCodeLensProvider";
@@ -35,7 +35,8 @@ export class Target {
         } as DecorationOptions;
     }
 
-    applyStyle(decorationType: TextEditorDecorationType, identifier: boolean = false): void {
+    applyStyle(decorationType: TextEditorDecorationType, hoverMessage?: MarkdownString | Array<MarkdownString>, identifier: boolean = false): void {
+        if(hoverMessage) this.decorationOptions.hoverMessage = hoverMessage;
         if(identifier) {
             if(!this.identifier) throw TypeError('Identifier is undefined');
             const r: Range = this.identifier!;
@@ -44,6 +45,14 @@ export class Target {
         } else {
             getDecorationController(this.document.fileName)?.decorateTarget(this, decorationType);
         }
+    }
+
+    setHoverMessage(hoverMessage: MarkdownString | Array<MarkdownString>) {
+        this.decorationOptions.hoverMessage = hoverMessage;
+    }
+
+    removeHoverMessage() {
+        this.decorationOptions.hoverMessage = undefined;
     }
 
     applyTextDecoration(textDecoration: ThemableDecorationAttachmentRenderOptions, position: string, identifier: boolean = false): TextEditorDecorationType {
@@ -55,7 +64,7 @@ export class Target {
         }
 
         const decorationType: TextEditorDecorationType = window.createTextEditorDecorationType(decorationOptions);
-        this.applyStyle(decorationType, identifier);
+        this.applyStyle(decorationType, undefined, identifier);
 
         return decorationType;
     }
