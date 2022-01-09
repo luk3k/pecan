@@ -22,6 +22,7 @@ export class Target {
     identifier: Range | undefined;
     start: Position;
     end: Position;
+    private identifierTarget: Target | undefined;
     readonly document: vscode.TextDocument;
     readonly decorationOptions: DecorationOptions;
 
@@ -36,13 +37,20 @@ export class Target {
     }
 
     applyStyle(decorationType: TextEditorDecorationType, hoverMessage?: MarkdownString | Array<MarkdownString>, identifier: boolean = false): void {
-        if(hoverMessage) this.decorationOptions.hoverMessage = hoverMessage;
         if(identifier) {
             if(!this.identifier) throw TypeError('Identifier is undefined');
             const r: Range = this.identifier!;
-            const t: Target = new Target(r, r.start, r.end, this.document);
-            getDecorationController(this.document.fileName)?.decorateTarget(t, decorationType);
+            if(!this.identifierTarget) {
+                this.identifierTarget = new Target(r, r.start, r.end, this.document);
+            }
+            if(hoverMessage) {
+                this.identifierTarget.setHoverMessage(hoverMessage);
+            }
+            getDecorationController(this.document.fileName)?.decorateTarget(this.identifierTarget, decorationType);
         } else {
+            if(hoverMessage) {
+                this.decorationOptions.hoverMessage = hoverMessage;
+            }
             getDecorationController(this.document.fileName)?.decorateTarget(this, decorationType);
         }
     }
@@ -51,8 +59,12 @@ export class Target {
         this.decorationOptions.hoverMessage = hoverMessage;
     }
 
-    removeHoverMessage() {
-        this.decorationOptions.hoverMessage = undefined;
+    removeHoverMessage(identifier: boolean = false) {
+        if(identifier) {
+            this.identifierTarget?.removeHoverMessage();
+        } else {
+            this.decorationOptions.hoverMessage = undefined;
+        }
     }
 
     applyTextDecoration(textDecoration: ThemableDecorationAttachmentRenderOptions, position: string, identifier: boolean = false): TextEditorDecorationType {
