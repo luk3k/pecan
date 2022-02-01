@@ -1,9 +1,9 @@
-import {JavaParserListener} from "../parsers/JavaParserListener";
+import {JavaParserListener} from "../parsers/java/JavaParserListener";
 import {
     ClassDeclarationContext, ConstructorDeclarationContext, FieldDeclarationContext, FormalParameterContext,
     MethodCallContext,
     MethodDeclarationContext,
-} from "../parsers/JavaParser";
+} from "../parsers/java/JavaParser";
 import {ClassDeclaration} from "./ClassDeclaration";
 import {JavaAst} from "./Ast";
 import {MethodDeclaration} from "./MethodDeclaration";

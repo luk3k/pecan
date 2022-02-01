@@ -17,7 +17,9 @@
   "scripts": {
     "build": "tsc",
     "run-ast": "ts-node ./src/Ast.ts",
-    "antlr4ts-lexer": "antlr4ts -visitor parsers/JavaLexer.g4",
-    "antlr4ts-parser": "antlr4ts -visitor parsers/JavaParser.g4"
+    "antlr4ts-lexer-java": "antlr4ts -visitor parsers/java/JavaLexer.g4",
+    "antlr4ts-parser-java": "antlr4ts -visitor parsers/java/JavaParser.g4",
+    "antlr4ts-lexer-python3": "antlr4ts -visitor parsers/python/Python3Lexer.g4",
+    "antlr4ts-parser-python3": "antlr4ts -visitor parsers/python/Python3Parser.g4"
   }
 }
