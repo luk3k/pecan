@@ -54,7 +54,7 @@ export class JavaAstListener implements JavaParserListener {
 
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
         const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine + 1) : start;
-        const idRange = ctx.IDENTIFIER() ? JavaAstListener.getIdRange(ctx.IDENTIFIER()!) : undefined;
+        const idRange = ctx.IDENTIFIER() ? this.getIdRange(ctx.IDENTIFIER()!) : undefined;
 
         this.ast.methodCalls.push(
             new MethodCall(idRange, start, stop, this.document, args)
@@ -76,7 +76,7 @@ export class JavaAstListener implements JavaParserListener {
     private getClassDeclaration(ctx: ClassDeclarationContext): ClassDeclaration {
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
         const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine + 1) : start;
-        const idRange = JavaAstListener.getIdRange(ctx.IDENTIFIER());
+        const idRange = this.getIdRange(ctx.IDENTIFIER());
 
         // add type parameters
         const typeParams = [];
@@ -85,7 +85,7 @@ export class JavaAstListener implements JavaParserListener {
                 const tpStart = new Position(tp.start.line - 1, tp.start.charPositionInLine);
                 const tpStop = tp.stop ?
                     new Position(tp.stop!.line - 1, tp.stop!.charPositionInLine + 1) : tpStart;
-                const tpIdRange = JavaAstListener.getIdRange(tp.IDENTIFIER());
+                const tpIdRange = this.getIdRange(tp.IDENTIFIER());
                 const tpTarget = new Target(tpIdRange, tpStart, tpStop, this.document);
                 typeParams.push(tpTarget);
             }
@@ -125,7 +125,7 @@ export class JavaAstListener implements JavaParserListener {
     }
 
     private getConstructorDeclaration(ctx: ConstructorDeclarationContext): ConstructorDeclaration {
-        const cidRange = JavaAstListener.getIdRange(ctx.IDENTIFIER());
+        const cidRange = this.getIdRange(ctx.IDENTIFIER());
         const cStart = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
         const cStop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine + 1) : cStart;
         let cParams: Variable[] = []
@@ -138,7 +138,7 @@ export class JavaAstListener implements JavaParserListener {
     }
 
     private getMethodDeclaration(ctx: MethodDeclarationContext): MethodDeclaration {
-        const idRange = JavaAstListener.getIdRange(ctx.IDENTIFIER());
+        const idRange = this.getIdRange(ctx.IDENTIFIER());
 
         // get method type
         const typeStart = new Position(
@@ -170,7 +170,7 @@ export class JavaAstListener implements JavaParserListener {
         for (let p of ctx) {
             const pStart = new Position(p.start.line - 1, p.start.charPositionInLine);
             const pStop = p.stop ? new Position(p.stop!.line - 1, p.stop!.charPositionInLine + 1) : pStart;
-            const pidRange = JavaAstListener.getIdRange(p.variableDeclaratorId().IDENTIFIER());
+            const pidRange = this.getIdRange(p.variableDeclaratorId().IDENTIFIER());
             params.push(new Variable(
                 pidRange, pStart, pStop, this.document, this.getTargetFromContext(p.typeType()), undefined)
             );
@@ -182,7 +182,7 @@ export class JavaAstListener implements JavaParserListener {
         const vars: Variable[] = []
         const type = this.getTargetFromContext(ctx.typeType());
         for (let fd of ctx.variableDeclarators().variableDeclarator()) {
-            const idRange = JavaAstListener.getIdRange(fd.variableDeclaratorId().IDENTIFIER());
+            const idRange = this.getIdRange(fd.variableDeclaratorId().IDENTIFIER());
             const start = new Position(fd.start.line - 1, fd.start.charPositionInLine);
             const stop = fd.stop ? new Position(fd.stop!.line - 1, fd.stop!.charPositionInLine + 1) : start;
             const val = fd.variableInitializer() ? this.getTargetFromContext(fd.variableInitializer()!) : undefined;
@@ -191,7 +191,7 @@ export class JavaAstListener implements JavaParserListener {
         return vars;
     }
 
-    private static getIdRange(identifier: TerminalNode): Range {
+    private getIdRange(identifier: TerminalNode): Range {
         const idStart = new Position(identifier.symbol.line - 1, identifier.symbol.charPositionInLine);
         const idStop = new Position(
             identifier.symbol.line - 1,

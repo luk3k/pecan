@@ -196,7 +196,6 @@ export class Python3Lexer extends Lexer {
 	  private indents: number[] = [];
 	  private opened: number = 0;
 	  private last_token: Token|undefined = undefined;
-	  @Override
 	  public reset(): void {
 	    // A queue where extra tokens are pushed on (see the NEWLINE lexer rule).
 	    this.token_queue = [];
@@ -207,7 +206,6 @@ export class Python3Lexer extends Lexer {
 	    super.reset();
 	  };
 
-	  @Override
 	  public emit(token?: Token): Token {
 	    if (token) {
 	      token = super.emit(token);
@@ -225,7 +223,6 @@ export class Python3Lexer extends Lexer {
 	   * literal.
 	   *
 	   */
-	  @Override
 	  public nextToken(): Token {
 	    // Check if the end-of-file is ahead and there are still some DEDENTS expected.
 	    if (this.inputStream.LA(1) === Python3Parser.EOF && this.indents.length) {
