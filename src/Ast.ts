@@ -63,7 +63,6 @@ export class JavaAst implements Ast {
 
     private setClassDeclarationsForMethods() {
         for (let c of this.classDeclarations) {
-            let classMethods = c.methodDeclarations;
             let filtered = this.methodDeclarations.filter(m => {
                 for (let cm of c.methodDeclarations) {
                     if (cm.isEqual(m)) {
@@ -116,5 +115,22 @@ export class Python3Ast implements Ast {
     init() {
         const python3Listener: Python3Listener = new Python3AstListener(this, this.document);
         ParseTreeWalker.DEFAULT.walk(python3Listener, this.tree);
+        this.setClassDeclarationsForMethods();
+    }
+
+    private setClassDeclarationsForMethods() {
+        for (let c of this.classDeclarations) {
+            let filtered = this.methodDeclarations.filter(m => {
+                for (let cm of c.methodDeclarations) {
+                    if (cm.isEqual(m)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            filtered.forEach(m => {
+                m.classDeclaration = c;
+            });
+        }
     }
 }

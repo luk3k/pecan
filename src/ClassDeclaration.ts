@@ -6,7 +6,7 @@ import {ConstructorDeclaration} from "./ConstructorDeclaration";
 
 export class ClassDeclaration extends Target {
     typeParams: Target[];
-    superClass: Target | null;
+    superClasses: Target[];
     interfaces: Target[];
     classBody: Target;
     constructorDeclarations: ConstructorDeclaration[];
@@ -14,11 +14,11 @@ export class ClassDeclaration extends Target {
     methodDeclarations: MethodDeclaration[];
 
     constructor(identifier: Range, start: Position, end: Position, document: TextDocument, typeParams: Target[],
-                superClass: Target | null, interfaces: Target[], classBody: Target,
+                superClasses: Target[], interfaces: Target[], classBody: Target,
                 constructorDeclarations: ConstructorDeclaration[], fields: Variable[], methodDeclarations: MethodDeclaration[]) {
         super(identifier, start, end, document);
         this.typeParams = typeParams;
-        this.superClass = superClass;
+        this.superClasses = superClasses;
         this.interfaces = interfaces;
         this.classBody = classBody;
         this.constructorDeclarations = constructorDeclarations;

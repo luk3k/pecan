@@ -91,7 +91,7 @@ export class JavaAstListener implements JavaParserListener {
             }
         }
 
-        const superClass = ctx.typeType() ? this.getTargetFromContext(ctx.typeType()!) : null;
+        const superClass = ctx.typeType() ? [this.getTargetFromContext(ctx.typeType()!)] : [];
 
         // add interfaces
         const interfaces = [];
