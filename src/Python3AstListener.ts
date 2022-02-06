@@ -93,7 +93,7 @@ export class Python3AstListener implements Python3Listener {
         for (let stmt of ctx.suite().stmt()) {
             if (stmt.simple_stmt()) {
                 const field = this.getSimpleStmt(stmt.simple_stmt()!)
-                if(field) {
+                if(field && !field?.getText().startsWith('"')) {
                     fields.push(field);
                 }
             } else if (stmt.compound_stmt()) {
