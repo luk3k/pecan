@@ -74,8 +74,10 @@ export class Python3AstListener implements Python3Listener {
     }
 
     private getClassDeclaration(ctx: ClassdefContext) {
+        const classBody = this.getTargetFromContext(ctx.suite());
+
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
-        const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine + 1) : start;
+        const stop = classBody.end;
         const idRange = this.getIdRange(ctx.NAME());
 
         // add superclasses
@@ -85,15 +87,13 @@ export class Python3AstListener implements Python3Listener {
             superClasses.push(this.getTargetFromContext(arg))
         }
 
-        const classBody = this.getTargetFromContext(ctx.suite());
-
         const fields: Variable[] = [];
         const methodDeclarations: MethodDeclaration[] = [];
         const constructorDeclarations: ConstructorDeclaration[] = [];
         for (let stmt of ctx.suite().stmt()) {
             if (stmt.simple_stmt()) {
                 const field = this.getSimpleStmt(stmt.simple_stmt()!)
-                if(field) {
+                if(field && !field?.getText().startsWith('"')) {
                     fields.push(field);
                 }
             } else if (stmt.compound_stmt()) {
@@ -161,10 +161,10 @@ export class Python3AstListener implements Python3Listener {
             params = this.getFormalParams(ctx.parameters().typedargslist()!);
         }
 
-        const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
-        const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine + 1) : start;
-
         const bodyTarget = this.getTargetFromContext(ctx.suite());
+
+        const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
+        const stop = bodyTarget.end;
 
         return new MethodDeclaration(idRange, start, stop, this.document, null, typeTarget, params, bodyTarget);
     }
