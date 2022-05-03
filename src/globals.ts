@@ -1,6 +1,5 @@
 import {Target} from "./Target";
 import * as vscode from 'vscode';
-import {TextEditor, TextEditorDecorationType} from "vscode";
 
 /**
  * Find all matches to the specified regular expressions. Return the found matches as Target objects
@@ -22,15 +21,4 @@ export function findTargets(document: vscode.TextDocument, regex: string | RegEx
         targets.push(new Target(new vscode.Range(startPos, endPos), startPos, endPos, document));
     }
     return targets;
-}
-
-export function applyStyle(ranges: vscode.Range[], decorationType: TextEditorDecorationType, editor: TextEditor): void {
-    const targets: Target[] = [];
-    ranges.forEach(r => {
-        r = editor.document.validateRange(r);
-        const t: Target = new Target(r, r.start, r.end, editor.document);
-        targets.push(t);
-    });
-
-    targets.forEach(t => t.applyStyle(decorationType));
 }
