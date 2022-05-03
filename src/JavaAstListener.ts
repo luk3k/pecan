@@ -61,6 +61,11 @@ export class JavaAstListener implements JavaParserListener {
         );
     }
 
+    /**
+     * Get a target from a ParserRuleContext. This method converts the ParserRuleContext to our target objects.
+     * @param ctx the context of the parser
+     * @return Target the target object
+     */
     private getTargetFromContext(ctx: ParserRuleContext): Target {
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
         let range = ctx.start.stopIndex - ctx.start.startIndex + 1;
@@ -73,6 +78,12 @@ export class JavaAstListener implements JavaParserListener {
         return new Target(targetRange, start, stop, this.document);
     }
 
+    /**
+     * Get a ClassDeclaration from a ClassDeclarationContext. This method also takes care of parsing all the
+     * member variables and methods contained in the given class including constructors.
+     * @param ctx the context of the parser
+     * @return ClassDeclaration the class declaration object
+     */
     private getClassDeclaration(ctx: ClassDeclarationContext): ClassDeclaration {
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
         const stop = ctx.stop ? new Position(ctx.stop!.line - 1, ctx.stop!.charPositionInLine + 1) : start;
@@ -124,6 +135,11 @@ export class JavaAstListener implements JavaParserListener {
         );
     }
 
+    /**
+     * Get a ClassDeclaration from a ClassDeclarationContext.
+     * @param ctx the context of the parser
+     * @return ConstructorDeclaration the constructor declaration object
+     */
     private getConstructorDeclaration(ctx: ConstructorDeclarationContext): ConstructorDeclaration {
         const cidRange = this.getIdRange(ctx.IDENTIFIER());
         const cStart = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
@@ -137,6 +153,11 @@ export class JavaAstListener implements JavaParserListener {
         return new ConstructorDeclaration(cidRange, cStart, cStop, this.document, null, cParams, body);
     }
 
+    /**
+     * Get a MethodDeclaration from a MethodDeclarationContext. Note that also the parameters of the method are parsed.
+     * @param ctx the context of the parser
+     * @return MethodDeclaration the method declaration object
+     */
     private getMethodDeclaration(ctx: MethodDeclarationContext): MethodDeclaration {
         const idRange = this.getIdRange(ctx.IDENTIFIER());
 
@@ -165,6 +186,11 @@ export class JavaAstListener implements JavaParserListener {
         return new MethodDeclaration(idRange, start, stop, this.document, null, typeTarget, params, bodyTarget);
     }
 
+    /**
+     * Parse the formal parameters of a function.
+     * @param ctx the context of the parser
+     * @return Variable array containing all formal parameters if they exist.
+     */
     private getFormalParams(ctx: FormalParameterContext[]): Variable[] {
         const params = [];
         for (let p of ctx) {
@@ -178,6 +204,11 @@ export class JavaAstListener implements JavaParserListener {
         return params;
     }
 
+    /**
+     * Get all FieldDeclarations from the specified context.
+     * @param ctx the context of the parser
+     * @return Variable array containing all field variables
+     */
     private getFieldDeclaration(ctx: FieldDeclarationContext): Variable[] {
         const vars: Variable[] = []
         const type = this.getTargetFromContext(ctx.typeType());
@@ -191,6 +222,11 @@ export class JavaAstListener implements JavaParserListener {
         return vars;
     }
 
+    /**
+     * Get the VSCode Range object for a given identifier.
+     * @param identifier the parser's terminal node
+     * @return Range the VSCode Range object
+     */
     private getIdRange(identifier: TerminalNode): Range {
         const idStart = new Position(identifier.symbol.line - 1, identifier.symbol.charPositionInLine);
         const idStop = new Position(

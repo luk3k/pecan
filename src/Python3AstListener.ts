@@ -73,7 +73,13 @@ export class Python3AstListener implements Python3Listener {
         }
     }
 
-    private getClassDeclaration(ctx: ClassdefContext) {
+    /**
+     * Get a ClassDeclaration from a ClassDeclarationContext. This method also takes care of parsing all the
+     * member variables and methods contained in the given class including constructors.
+     * @param ctx the context of the parser
+     * @return ClassDeclaration the class declaration object
+     */
+    private getClassDeclaration(ctx: ClassdefContext): ClassDeclaration {
         const classBody = this.getTargetFromContext(ctx.suite());
 
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
@@ -97,7 +103,7 @@ export class Python3AstListener implements Python3Listener {
                     fields.push(field);
                 }
             } else if (stmt.compound_stmt()) {
-                const funcDef = this.getCompountStmt(stmt.compound_stmt()!);
+                const funcDef = this.getCompoundStmt(stmt.compound_stmt()!);
                 if (funcDef) {
                     if (funcDef.getIdentifierText() === '__init__') {
                         constructorDeclarations.push(new ConstructorDeclaration(
@@ -117,7 +123,14 @@ export class Python3AstListener implements Python3Listener {
         );
     }
 
-    private getCompountStmt(ctx: Compound_stmtContext): MethodDeclaration | null {
+    /**
+     * This method takes the Compound_stmtContext from the parser and transforms it to a MethodDeclaration.
+     * This is needed to be able to parse async as well as normal functions. Note that we do not differentiate between
+     * the them.
+     * @param ctx the context of the parser
+     * @return MethodDeclaration if the compound statement was a function definition or null otherwise
+     */
+    private getCompoundStmt(ctx: Compound_stmtContext): MethodDeclaration | null {
         if(ctx.funcdef()) {
             return this.getFunc(ctx.funcdef()!)
         } else if (ctx.async_stmt()?.funcdef()) {
@@ -126,6 +139,11 @@ export class Python3AstListener implements Python3Listener {
         return null;
     }
 
+    /**
+     * Get a Variable from the Simple_stmtContext.
+     * @param ctx the context of the parser
+     * @return Variable if the Simple_stmtContext contained a variable or null otherwise
+     */
     private getSimpleStmt(ctx: Simple_stmtContext): Variable | null {
         if(ctx.small_stmt()[0].expr_stmt()) {
             const stmt = ctx.small_stmt()[0].expr_stmt()!;
@@ -148,7 +166,12 @@ export class Python3AstListener implements Python3Listener {
         return null;
     }
 
-    private getFunc(ctx: FuncdefContext) {
+    /**
+     * Get a MethodDeclaration from a MethodDeclarationContext. Note that also the parameters of the method are parsed.
+     * @param ctx the context of the parser
+     * @return MethodDeclaration the method declaration object
+     */
+    private getFunc(ctx: FuncdefContext): MethodDeclaration {
         // collect arguments of method call
         const idRange = this.getIdRange(ctx.NAME());
 
@@ -169,6 +192,11 @@ export class Python3AstListener implements Python3Listener {
         return new MethodDeclaration(idRange, start, stop, this.document, null, typeTarget, params, bodyTarget);
     }
 
+    /**
+     * Get a target from a ParserRuleContext. This method converts the ParserRuleContext to our target objects.
+     * @param ctx the context of the parser
+     * @return Target the target object
+     */
     private getTargetFromContext(ctx: ParserRuleContext): Target {
         const start = new Position(ctx.start.line - 1, ctx.start.charPositionInLine);
         let range = ctx.start.stopIndex - ctx.start.startIndex + 1;
@@ -181,6 +209,11 @@ export class Python3AstListener implements Python3Listener {
         return new Target(targetRange, start, stop, this.document);
     }
 
+    /**
+     * Parse the formal parameters of a function.
+     * @param arglist the context of the parser
+     * @return Variable array containing all formal parameters if they exist.
+     */
     private getFormalParams(arglist: TypedargslistContext): Variable[] {
         const params = [];
         const tfpCtx: TfpdefContext[] = arglist.tfpdef();
@@ -211,6 +244,11 @@ export class Python3AstListener implements Python3Listener {
         return params;
     }
 
+    /**
+     * Get the VSCode Range object for a given identifier.
+     * @param identifier the parser's terminal node
+     * @return Range the VSCode Range object
+     */
     private getIdRange(identifier: TerminalNode): Range {
         const idStart = new Position(identifier.symbol.line - 1, identifier.symbol.charPositionInLine);
         const idStop = new Position(

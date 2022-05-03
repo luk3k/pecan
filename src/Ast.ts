@@ -21,6 +21,9 @@ interface Ast {
     methodCalls: MethodCall[];
 }
 
+/**
+ * This class represent the abstract syntax tree for the java language.
+ */
 export class JavaAst implements Ast {
     readonly tree: ParseTree;
     readonly document: TextDocument;
@@ -61,6 +64,10 @@ export class JavaAst implements Ast {
         this.setClassDeclarationsForMethods();
     }
 
+    /**
+     * Set the correct class for each method declaration in this AST.
+     * @private
+     */
     private setClassDeclarationsForMethods() {
         for (let c of this.classDeclarations) {
             let filtered = this.methodDeclarations.filter(m => {
@@ -78,6 +85,10 @@ export class JavaAst implements Ast {
     }
 }
 
+
+/**
+ * This class represent the abstract syntax tree for the python language.
+ */
 export class Python3Ast implements Ast {
     readonly tree: ParseTree;
     readonly document: TextDocument;
@@ -118,6 +129,10 @@ export class Python3Ast implements Ast {
         this.setClassDeclarationsForMethods();
     }
 
+    /**
+     * Set the correct class for each method declaration in this AST.
+     * @private
+     */
     private setClassDeclarationsForMethods() {
         for (let c of this.classDeclarations) {
             let filtered = this.methodDeclarations.filter(m => {
