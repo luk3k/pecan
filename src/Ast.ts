@@ -13,7 +13,7 @@ import {Python3Parser} from "../parsers/python/Python3Parser";
 import {Python3AstListener} from "./Python3AstListener";
 import {Python3Listener} from "../parsers/python/Python3Listener";
 
-interface Ast {
+export interface Ast {
     readonly tree: ParseTree;
     readonly document: TextDocument;
     classDeclarations: ClassDeclaration[];
