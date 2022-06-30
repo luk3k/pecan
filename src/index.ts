@@ -91,7 +91,7 @@ export function unregisterTextEditor(editor: TextEditor) {
 }
 
 /**
- * Removes all controller. Also disposes of all decorations and codeLenses.
+ * Removes all controllers. Also disposes of all decorations and codeLenses.
  */
 export function unregisterAllTextEditors() {
     for(const fileName of decorationControllers.keys()) {

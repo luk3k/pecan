@@ -32,7 +32,7 @@ export class JavaAst implements Ast {
     methodCalls: MethodCall[] = [];
 
     /**
-     * Initialize the ParseTree object for a given fil
+     * Initialize the ParseTree object for a given file
      * @param document the vscode document which also includes the text
      */
     constructor(document: TextDocument) {
@@ -42,9 +42,8 @@ export class JavaAst implements Ast {
     }
 
     /**
-     * Parse the file from the given path and return
+     * Parse the file from the given source code
      * @param source the source code to be parsed
-     * @return ParseTree of the current file
      */
     parse(source: string): ParseTree {
         const chars = CharStreams.fromString(source);
@@ -97,7 +96,7 @@ export class Python3Ast implements Ast {
     methodCalls: MethodCall[] = [];
 
     /**
-     * Initialize the ParseTree object for a given fil
+     * Initialize the ParseTree object for a given file
      * @param document the vscode document which also includes the text
      */
     constructor(document: TextDocument) {
@@ -107,9 +106,8 @@ export class Python3Ast implements Ast {
     }
 
     /**
-     * Parse the file from the given path and return
+     * Parse the file from the given source code
      * @param source the source code to be parsed
-     * @return ParseTree of the current file
      */
     parse(source: string) {
         const chars = CharStreams.fromString(source);

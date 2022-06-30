@@ -11,7 +11,6 @@ import {
     window, MarkdownString
 } from 'vscode';
 import * as vscode from 'vscode';
-import {DefaultCodeLensProvider} from "./DefaultCodeLensProvider";
 import {getCodeLensController, getDecorationController} from "./index";
 
 /**
